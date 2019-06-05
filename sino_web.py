@@ -1,3 +1,9 @@
+# Script Name   : sino_web.py
+# Author        : Gan Dawei
+# Created       : 2019.6.5
+# Version       : 1.0
+# Description   : In order to increase click times of article by author in sinohydro web.
+
 import requests
 import lxml
 import sys,io

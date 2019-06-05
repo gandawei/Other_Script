@@ -30,7 +30,7 @@ class return_selector():
 
 if __name__ == '__main__':
     start_time = time.time()
-    name="王慧芳" #作者人名
+    name="XXX" #作者人名
     times= random.randint(650,750) #总点击次数
     title_name=''
     clicks=0

@@ -11,8 +11,8 @@ import re
 
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='gb18030')
-username='123777'
-Password ='123456'
+username='xxxxxx'
+Password ='xxxxxx'
 url_data={
     'history_url':{
       'url':'http://bajuintl.yunxuetang.cn/apps/sty/mystudyhistoyimageinfo.htm'

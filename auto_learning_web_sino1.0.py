@@ -3,7 +3,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from data_mango_save_fordemo import mango_save
+from data_mango_save_fordemo_test import mango_save
 
 import time
 import sys,io
@@ -13,6 +13,80 @@ import re
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='gb18030')
 username='123777'
 Password ='123456'
+url_data={
+    'history_url':{
+      'url':'http://bajuintl.yunxuetang.cn/apps/sty/mystudyhistoyimageinfo.htm'
+    },
+    'Brand':{
+        'page':0,
+        'url':'http://bajuintl.yunxuetang.cn/kng/knowledgecatalogsearch.htm?id=21a37a59-fb55-458c-a2ea-75aa9a740f0a&sf=UploadDate&s=dc&st=1&rn=001&h=tree',
+    },
+    'Leadership':{
+        'page':6,
+        'url':'http://bajuintl.yunxuetang.cn/kng/knowledgecatalogsearch.htm?id=1466b7dd-6f84-4734-b889-05c3e8a9a362&rn=002&h=tree&sf=UploadDate&s=dc&st=1',
+    },
+    'Party':{
+        'page':3,
+        'url':'http://bajuintl.yunxuetang.cn/kng/knowledgecatalogsearch.htm?id=2372a12f-90f9-41da-8658-c020ac5b1d90&sf=UploadDate&s=dc&st=1&rn=006&h=tree'
+    },
+    'Professional':{
+        'page':22,
+        'url':'http://bajuintl.yunxuetang.cn/kng/knowledgecatalogsearch.htm?id=73278079-0df2-4328-97e9-71c8335073b8&rn=003&h=tree&sf=UploadDate&s=dc&st=1'
+    },
+    'Good':{
+        'page':0,
+        'url':'http://bajuintl.yunxuetang.cn/kng/knowledgecatalogsearch.htm?id=01f395a8-efaf-46fe-ba72-cf69623a3191&rn=004&h=tree&sf=UploadDate&s=dc&st=1'
+    },
+    'Expand':{
+        'page':5,
+        'url':'http://bajuintl.yunxuetang.cn/kng/knowledgecatalogsearch.htm?id=9d0c5fb7-d16a-48ba-99ef-d9a6a862be73&rn=005&h=tree&sf=UploadDate&s=dc&st=1'
+    }
+
+}
+def url_build_before():
+    url_list=[]
+    tag=['Party','Expand','Good'] #选择获取哪些栏目链接
+    for i in tag:
+        page=url_data[i]['page']
+        url=url_data[i]['url']
+        list=url_build(url,page)
+        for j in list:
+            url_list.append(j)
+    return url_list
+
+def url_build(url,page):
+    url_list = []
+    url_list.append(url)
+    if page==0:
+        return url_list
+    else:
+        page=int(page)+1
+        for i in range(2,page):
+            url1 = url+'&pi={}'.format(i)
+            url_list.append(url1)
+        print('主url已返回')
+        return url_list
+
+def url_build_after(driver,list):
+    driver_new=driver
+    url_list=list
+    ms=mango_save()
+    for i in range(len(url_list)):
+        name_list=[]
+        column=url_list[i][-15:-12]+'_'+url_list[i][-1]
+        print(column)
+        driver_new.get(url_list[i])
+        time.sleep(5)
+        #selector=driver_new.find_elements_by_xpath('//div[@class="h-40 lh20 break-word"]/span')
+        selector_tag=driver_new.find_elements_by_xpath('//span[contains(@class,"Knowledge")]')
+        selector = driver_new.find_elements_by_xpath('//span[contains(@class,"Knowledge")]/following-sibling::a')
+        for x in range(len(selector)):
+           ms.insert_data(username,selector_tag[x].get_attribute('class')[10:],selector[x].get_attribute('href'),column,selector[x].get_attribute('title'),200)
+        time.sleep(5)
+        print(len(selector_tag))
+        print(name_list)
+        print('url地址已合成成功')
+
 def wait_time_id(driver,time,id):
     set_time = int(time)
     id = str(id)
@@ -21,6 +95,7 @@ def wait_time_id(driver,time,id):
     except Exception as e:
         print('Wait id {} too long'.format(id))
         pass
+
 def wait_time_CLASS(driver,time,className):
     set_time = int(time)
     className = str(className)
@@ -29,6 +104,7 @@ def wait_time_CLASS(driver,time,className):
     except Exception as e:
         print('Wait class {} too long'.format(className))
         pass
+
 def login_Pass(driver, url):
     driver.get(url)
     wait_time_id(driver, 30, 'txtUserName2')
@@ -45,6 +121,7 @@ def login_Pass(driver, url):
         driver.find_element_by_xpath('//input[@value="下次再说"]').click()
         time.sleep(2)
     return driver
+
 def open_except_package(table,driver,data):
     data=data
     driver_new=driver
@@ -54,7 +131,6 @@ def open_except_package(table,driver,data):
     html = driver_new.page_source
     pattern = '<span data-localize="sty_lbl_hours">学时</span>：</span>(.*?)<span data-localize="kng_lbl_minutes">(.*?)</span> <span class="text-grey ml30"><span data-localize="kng_lbl_leancount">'
     time1 = re.findall(pattern, html)[0]
-    print('需要等待{}分钟'.format(time1))#测试用 可删除
     if str(time1[1]) == "分钟":
         total_time = 60 * (float(time1[0]) + 0.1)
     else:
@@ -89,7 +165,7 @@ def open_package(table,driver,data):
             pattern = '<span data-localize="sty_lbl_hours">学时</span>：</span>(.*?)<span data-localize="kng_lbl_minutes">(.*?)</span> <span class="text-grey ml30"><span data-localize="kng_lbl_leancount">'
             time1 = re.findall(pattern, html)[0]
             if str(time1[1]) == "分钟":
-                total_time = 2 * (float(time1[0]) + 0.2)  # 测试
+                total_time = 60 * (float(time1[0]) + 0.2)
             else:
                 total_time = int(time1[0]) + 20
             time.sleep(total_time)
@@ -114,6 +190,34 @@ def url_from_db_open(driver):
             print('执行调用处理Tag标签的程序')
     time.sleep(1) #测试用 后期可删除
 
+def auto_match_history(driver):
+    try:
+        table = mango_save()
+        list = []
+        list_title=[]
+        driver_new = driver
+        driver_new.get(url_data['history_url']['url'])
+        time.sleep(10)#等待完成，后期需要改成wait方法
+        process_list = driver_new.find_elements_by_xpath("//span[@class='propercentage']")
+        for i in process_list:
+            list.append(i.text)
+        title_list = driver_new.find_elements_by_xpath("//div[@class='docname detailelement']")
+        for j in title_list:
+            list_title.append(j.get_attribute('title'))
+        for i in range(len(list_title)):
+            condition={'name':username,'title':list_title[i]}
+            result={'url':1}
+            re=table.find_url(condition,result)
+            print(re) #可删除
+            if list[i] == '100%' and re is not None:
+                condition1 = {'name': username, 'title': list_title[i]}
+                set = {"$set":{'code': 300}}
+                table.update_data(condition1, set)
+        print('auto save finish')
+    except Exception as e:
+        print('auto save not finish,problem:{}'.format(e))
+
+
 if __name__ == "__main__":
     detail_url_list = []
     chrome_options = webdriver.ChromeOptions()
@@ -122,8 +226,20 @@ if __name__ == "__main__":
     driver = webdriver.Chrome(chrome_options=chrome_options)
     #driver = webdriver.Chrome('./chromedriver.exe')
     login_url = 'http://bajuintl.yunxuetang.cn'
+    input_message=input('请确认是否执行更新数据链子程序.YES OR NO :')
     driver_new = login_Pass(driver, login_url)
-    url_from_db_open(driver_new)
+    if input_message == 'yes':
+        print('开始执行更新数据链子程序')
+        time.sleep(2)
+        print('开始采集数据，请勿中止。')
+        url_list = url_build_before()
+        url_build_after(driver_new, url_list)
+        auto_match_history(driver_new)
+    if input_message=='no':
+        print('开始执行模拟操作子程序')
+        time.sleep(2)
+        print('进行中，请勿中止')
+        url_from_db_open(driver_new)
 
 
 
